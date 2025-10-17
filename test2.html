@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>InterviewPrep AI</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0e1a35;
+      --primary-light: #162a56;
+      --background: #f5f7fa;
+      --bot-bubble: #e8ecf3;
+      --user-bubble: #0e1a35;
+      --text: #1f1f1f;
+      --white: #ffffff;
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100%;
+      background: var(--white);
+    }
+
+    /* HEADER */
+    .chat-header {
+      background: var(--primary);
+      color: var(--white);
+      padding: 18px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .clear-btn {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid var(--white);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .clear-btn:hover {
+      background: var(--white);
+      color: var(--primary);
+    }
+
+    .chat-header .icon {
+      font-size: 22px;
+    }
+
+    /* MESSAGES AREA */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      background: var(--background);
+      scroll-behavior: smooth;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      line-height: 1.7;
+      font-size: 16px;
+      animation: fadeIn 0.25s ease-out;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      background: var(--user-bubble);
+      color: var(--white);
+      align-self: flex-end;
+      border-radius: 16px 16px 0 16px;
+    }
+
+    .message.bot {
+      background: var(--bot-bubble);
+      color: var(--text);
+      align-self: flex-start;
+      border-radius: 16px 16px 16px 0;
+    }
+
+    .message strong { color: var(--primary); font-weight: 600; }
+
+    .message-time {
+      display: block;
+      font-size: 12px;
+      opacity: 0.6;
+      margin-top: 5px;
+      text-align: right;
+    }
+
+    /* TYPING INDICATOR */
+    .message.typing { display: flex; align-items: center; background: var(--bot-bubble); }
+
+    .typing-indicator { display: flex; gap: 6px; }
+    .typing-dot {
+      width: 8px; height: 8px;
+      background-color: var(--primary);
+      border-radius: 50%; opacity: 0.8;
+    }
+    .typing-dot:nth-child(1) { animation: typing 1.2s infinite; }
+    .typing-dot:nth-child(2) { animation: typing 1.2s infinite 0.4s; }
+    .typing-dot:nth-child(3) { animation: typing 1.2s infinite 0.8s; }
+
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    /* INPUT AREA */
+    .chat-input-area {
+      display: flex;
+      padding: 20px 30px;
+      background: var(--white);
+      border-top: 1px solid #ddd;
+      flex-shrink: 0;
+    }
+
+    #userInput {
+      flex: 1;
+      padding: 14px 18px;
+      border: 1px solid #ccc;
+      border-radius: var(--radius);
+      background: #f0f0f0;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    #userInput:focus { border: 1px solid var(--primary); background: #fff; }
+
+    #sendButton {
+      width: 50px; height: 50px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-left: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      transition: 0.25s;
+    }
+
+    #sendButton:hover { background: var(--primary-light); transform: translateY(-2px); }
+
+    .chat-messages::-webkit-scrollbar { width: 8px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+    @media (max-width: 768px) {
+      .chat-messages { padding: 20px 15px; }
+      .message { font-size: 15px; max-width: 90%; }
+      .chat-input-area { padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      InterviewPrep AI
+      <div class="header-actions">
+        <button class="clear-btn" onclick="clearChat()"><i class="fas fa-trash"></i> Clear</button>
+        <i class="fas fa-user-tie icon"></i>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <div class="chat-input-area">
+      <input type="text" id="userInput" placeholder="Type your response..." autocomplete="off">
+      <button id="sendButton"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <script>
+    const GEMINI_API_KEY = "AIzaSyDE8dg0bEqqasQdJvYdUp4ckkHYe0dkZ-Q"; 
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const SYSTEM_PROMPT = `
+You are a professional Interview Coach chatbot designed to help users prepare for mock interviews.
+Maintain a confident, formal tone and answer clearly.
+If the user requests "in points," list responses in well-spaced bullet points or numbered format.
+Keep answers concise and structured. 
+Always end with a short motivational line such as:
+"Confidence is your best asset in every interview."`;
+
+    let History = JSON.parse(localStorage.getItem("chatHistory")) || [];
+
+    function saveHistory() {
+      localStorage.setItem("chatHistory", JSON.stringify(History));
+    }
+
+    function getCurrentTime() {
+      const now = new Date();
+      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function addMessageToUI(text, sender, typing = false) {
+      const chat = document.getElementById('chatMessages');
+      const msg = document.createElement('div');
+      msg.classList.add('message', sender);
+
+      if (typing) {
+        msg.classList.add('typing');
+        msg.innerHTML = `
+          <div class="typing-indicator">
+            <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+          </div>`;
+      } else {
+        msg.innerHTML = `<span>${text}</span>
+        <span class="message-time">${getCurrentTime()}</span>`;
+      }
+
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+      return msg;
+    }
+
+    function loadHistory() {
+      const chat = document.getElementById('chatMessages');
+      chat.innerHTML = '';
+      if (History.length === 0) {
+        const greeting = "Hello! I'm your Interview Coach. Let’s start with a classic question:<br><strong>“Tell me about yourself.”</strong>";
+        addMessageToUI(greeting, 'bot');
+        History.push({ role: 'bot', text: greeting });
+        saveHistory();
+      } else {
+        History.forEach(item => {
+          addMessageToUI(item.text, item.role);
+        });
+      }
+    }
+
+    async function getGeminiResponse(userText) {
+      const contents = History
+        .filter(h => h.role === 'user' || h.role === 'bot')
+        .map(h => ({ role: h.role === 'user' ? 'user' : 'model', parts: [{ text: h.text }] }));
+
+      contents.push({ role: 'user', parts: [{ text: userText }] });
+
+      const body = {
+        contents: contents,
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        generationConfig: { temperature: 0.8, maxOutputTokens: 600 }
+      };
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+      if (!res.ok) return `⚠️ Error: ${data.error?.message || 'Unknown error'}`;
+
+      return data?.candidates?.[0]?.content?.parts?.[0]?.text || "I didn’t quite catch that. Could you try again?";
+    }
+
+    async function handleSend() {
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessageToUI(text, 'user');
+      History.push({ role: 'user', text });
+      saveHistory();
+      input.value = '';
+
+      const typing = addMessageToUI('', 'bot', true);
+      try {
+        const botReply = await getGeminiResponse(text);
+        typing.remove();
+        addMessageToUI(botReply, 'bot');
+        History.push({ role: 'bot', text: botReply });
+        saveHistory();
+      } catch {
+        typing.remove();
+        const errorMsg = "⚠️ Network error. Please try again.";
+        addMessageToUI(errorMsg, 'bot');
+        History.push({ role: 'bot', text: errorMsg });
+        saveHistory();
+      }
+    }
+
+    // 🧹 Clear Chat Function
+    function clearChat() {
+      localStorage.removeItem('chatHistory');
+      History = [];
+      loadHistory();
+    }
+
+    document.getElementById('sendButton').addEventListener('click', handleSend);
+    document.getElementById('userInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSend();
+    });
+
+    // Load previous chat on page load
+    loadHistory();
+  </script>
+</body>
+</html>
